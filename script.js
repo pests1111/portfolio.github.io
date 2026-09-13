@@ -1,62 +1,31 @@
-// Mobile menu toggle
+// Navbar: transparent over the hero photo, solid once scrolled past it
+const navbarEl = document.querySelector('.navbar');
+if (navbarEl) {
+  const toggleNavbar = () => {
+    navbarEl.classList.toggle('scrolled', window.scrollY > 40);
+  };
+  toggleNavbar();
+  window.addEventListener('scroll', toggleNavbar, { passive: true });
+}
+
+// Footer year
+const yearEl = document.getElementById('year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Mobile nav toggle
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
 
-menuToggle.addEventListener('click', () => {
-  menuToggle.classList.toggle('open');
-  navLinks.classList.toggle('open');
-});
-
-// Close mobile menu when a link is clicked
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => {
-    menuToggle.classList.remove('open');
-    navLinks.classList.remove('open');
+if (menuToggle && navLinks) {
+  menuToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
   });
-});
 
-// Contact form — submits to contact.php, which saves it to the database
-const contactForm = document.getElementById('contactForm');
-const formStatus = document.getElementById('formStatus');
-
-contactForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const submitBtn = contactForm.querySelector('button[type="submit"]');
-  submitBtn.disabled = true;
-  formStatus.style.color = '';
-  formStatus.textContent = 'Sending...';
-
-  try {
-    const res = await fetch('contact.php', {
-      method: 'POST',
-      body: new FormData(contactForm),
+  navLinks.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
     });
-    const data = await res.json();
-
-    if (data.success) {
-      formStatus.textContent = data.message;
-      contactForm.reset();
-    } else {
-      formStatus.style.color = '#ff3d3d';
-      formStatus.textContent = data.error || 'Something went wrong. Please try again.';
-    }
-  } catch (err) {
-    formStatus.style.color = '#ff3d3d';
-    formStatus.textContent = 'Could not reach the server. Please try again later.';
-  } finally {
-    submitBtn.disabled = false;
-  }
-});
-
-// Footer year
-document.getElementById('year').textContent = new Date().getFullYear();
-
-// Navbar shrink on scroll
-const navbar = document.querySelector('.navbar');
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 20) {
-    navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-  } else {
-    navbar.style.boxShadow = 'none';
-  }
-});
+  });
+}
