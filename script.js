@@ -1,3 +1,7 @@
+// This must run first: CSS only hides .reveal content once this class
+// is present, so if this script never runs at all, nothing gets hidden.
+document.body.classList.add('js');
+
 // Navbar: transparent over the hero photo, solid once scrolled past it
 const navbarEl = document.querySelector('.navbar');
 if (navbarEl) {
@@ -70,29 +74,40 @@ function animateCount(el) {
 // of `.reveal-group` containers as they enter the viewport.
 const revealTargets = document.querySelectorAll('.reveal, .reveal-group');
 
+function revealElement(el) {
+  if (el.classList.contains('reveal-group')) {
+    Array.from(el.children).forEach((child, i) => {
+      child.style.transitionDelay = Math.min(i * 70, 420) + 'ms';
+    });
+  }
+  el.classList.add('is-visible');
+  el.querySelectorAll('[data-count]').forEach(animateCount);
+}
+
 if (!prefersReducedMotion && 'IntersectionObserver' in window && revealTargets.length) {
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      const el = entry.target;
-
-      if (el.classList.contains('reveal-group')) {
-        Array.from(el.children).forEach((child, i) => {
-          child.style.transitionDelay = Math.min(i * 70, 420) + 'ms';
-        });
-      }
-      el.classList.add('is-visible');
-
-      el.querySelectorAll('[data-count]').forEach(animateCount);
-
-      obs.unobserve(el);
+      revealElement(entry.target);
+      obs.unobserve(entry.target);
     });
-  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+  }, { threshold: 0.1 });
 
   revealTargets.forEach((el) => observer.observe(el));
+
+  // Anything already on screen at load (e.g. the hero caption, which
+  // sits pinned near the bottom of the first viewport) should appear
+  // right away rather than waiting on the observer's first callback.
+  revealTargets.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      revealElement(el);
+      observer.unobserve(el);
+    }
+  });
 } else {
   // No IntersectionObserver support, or motion is reduced: just show everything.
-  revealTargets.forEach((el) => el.classList.add('is-visible'));
+  revealTargets.forEach(revealElement);
 }
 
 // Subtle hero parallax on scroll — the image is sized taller than its
