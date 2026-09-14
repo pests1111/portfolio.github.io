@@ -58,15 +58,16 @@ ul{ margin: 0; padding: 0; list-style: none; }
 }
 
 /* ===================== SCROLL-REVEAL SYSTEM ===================== */
-/* JS toggles .is-visible via IntersectionObserver. If motion is reduced,
-   or JS never runs, body.no-animate keeps everything fully visible —
-   the hidden state below only applies when animation is safe to run. */
+/* script.js adds body.js as its very first line, then toggles .is-visible
+   via IntersectionObserver. Content only ever hides once that "js" flag
+   confirms the script actually ran — if it 404s, is blocked, or errors,
+   nothing here applies and the page stays fully visible by default. */
 
-body:not(.no-animate) .reveal{
+body.js:not(.no-animate) .reveal{
   opacity: 0;
   transform: translateY(28px);
 }
-body:not(.no-animate) .reveal-group > *{
+body.js:not(.no-animate) .reveal-group > *{
   opacity: 0;
   transform: translateY(24px);
 }
